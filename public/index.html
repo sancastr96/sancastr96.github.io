@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d0a14" />
+  <meta name="description" content="Wiki de Mewgenics en Español - Busca objetos, habilidades, enemigos y más" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Mewgenics Wiki 🐱</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0d0a14;
+      --surface: #13101e;
+      --surface2: #1c1729;
+      --border: #2e2545;
+      --accent: #c97bff;
+      --accent2: #ff6b6b;
+      --gold: #f0c060;
+      --text: #e8dff5;
+      --muted: #8b7aaa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 18px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(201,123,255,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 50% at 80% 80%, rgba(255,107,107,0.05) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    header {
+      text-align: center;
+      padding: 48px 0 36px;
+    }
+
+    .logo-cat {
+      font-size: 52px;
+      display: block;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 20px var(--accent));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.4rem, 5vw, 2.4rem);
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-shadow: 0 0 30px rgba(201,123,255,0.5);
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 8px;
+      font-style: italic;
+      letter-spacing: 1px;
+    }
+
+    .divider {
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      margin: 20px auto;
+      opacity: 0.4;
+    }
+
+    .categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    .cat-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cat-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(201,123,255,0.08);
+    }
+
+    .search-wrap {
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    #searchInput {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.1rem;
+      padding: 16px 60px 16px 50px;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #searchInput:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(201,123,255,0.1);
+    }
+
+    #searchInput::placeholder { color: var(--muted); font-style: italic; }
+
+    .search-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--accent);
+      border: none;
+      color: #0d0a14;
+      font-weight: 700;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .search-btn:hover { background: #d98aff; }
+    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      position: relative;
+      overflow: hidden;
+      animation: slideUp 0.35s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--gold));
+    }
+
+    .result-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      background: rgba(201,123,255,0.12);
+      border: 1px solid rgba(201,123,255,0.3);
+      color: var(--accent);
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+
+    .result-body { line-height: 1.75; color: var(--text); font-size: 1rem; }
+    .result-body h3 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin: 18px 0 8px;
+    }
+    .result-body ul { padding-left: 20px; }
+    .result-body li { margin-bottom: 6px; color: #d0c4e8; }
+    .result-body strong { color: var(--gold); font-weight: 600; }
+    .result-body em { color: var(--accent); font-style: italic; }
+    .result-body p { margin-bottom: 12px; }
+
+    .source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-family: 'JetBrains Mono', monospace;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .source-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    .loading {
+      text-align: center;
+      padding: 48px 0;
+      animation: slideUp 0.3s ease;
+    }
+
+    .paws {
+      font-size: 32px;
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .loading p { color: var(--muted); font-style: italic; margin-top: 16px; }
+
+    .welcome { text-align: center; padding: 32px 0; }
+    .welcome .big-cat { font-size: 64px; display: block; margin-bottom: 12px; }
+
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .example-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.88rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .example-chip:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(240,192,96,0.05);
+    }
+
+    .error-msg {
+      text-align: center;
+      padding: 32px;
+      color: var(--accent2);
+      font-style: italic;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+    }
+
+    #installBanner {
+      display: none;
+      background: var(--surface2);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #installBanner span { flex: 1; font-size: 0.9rem; }
+
+    .install-btn {
+      background: var(--accent);
+      color: #0d0a14;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .dismiss-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    @media (max-width: 600px) {
+      .result-card { padding: 20px 18px; }
+      h1 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div id="installBanner">
+    <span>📲 Instalá la app: menú del navegador → "Agregar a pantalla de inicio"</span>
+    <button class="install-btn" id="installBtn">Instalar</button>
+    <button class="dismiss-btn" id="dismissBtn">✕</button>
+  </div>
+
+  <header>
+    <span class="logo-cat">🐱</span>
+    <h1>Mewgenics Wiki</h1>
+    <p class="subtitle">en español · powered by IA</p>
+    <div class="divider"></div>
+  </header>
+
+  <div class="categories">
+    <button class="cat-btn" onclick="searchCategory('clases')">⚔️ Clases</button>
+    <button class="cat-btn" onclick="searchCategory('habilidades')">✨ Habilidades</button>
+    <button class="cat-btn" onclick="searchCategory('enemigos')">👹 Enemigos</button>
+    <button class="cat-btn" onclick="searchCategory('objetos y armas')">🗡️ Objetos</button>
+    <button class="cat-btn" onclick="searchCategory('mutaciones')">🧬 Mutaciones</button>
+    <button class="cat-btn" onclick="searchCategory('elementos de combate')">🔥 Elementos</button>
+    <button class="cat-btn" onclick="searchCategory('NPCs')">🧑 NPCs</button>
+    <button class="cat-btn" onclick="searchCategory('mecánicas de cría y genética')">🐣 Cría</button>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Buscá: Mage, Fartoom, Bunker, Fire, Pebbles..."
+      autocomplete="off"
+    />
+    <button class="search-btn" id="searchBtn" onclick="doSearch()">BUSCAR</button>
+  </div>
+
+  <div id="results">
+    <div class="welcome">
+      <span class="big-cat">🐾</span>
+      <p style="color:var(--muted); font-style:italic; margin-bottom:4px;">Buscá cualquier cosa del juego</p>
+      <p style="color:var(--muted); font-size:0.9rem;">objetos, habilidades, enemigos, clases, mecánicas...</p>
+      <div class="examples">
+        <span class="example-chip" onclick="quickSearch('Mage')">Mage</span>
+        <span class="example-chip" onclick="quickSearch('Hunter')">Hunter</span>
+        <span class="example-chip" onclick="quickSearch('Fartoom')">Fartoom</span>
+        <span class="example-chip" onclick="quickSearch('Bunker')">Bunker</span>
+        <span class="example-chip" onclick="quickSearch('Fire element')">Elemento Fuego</span>
+        <span class="example-chip" onclick="quickSearch('Mutations')">Mutaciones</span>
+        <span class="example-chip" onclick="quickSearch('Dr. Beanies')">Dr. Beanies</span>
+        <span class="example-chip" onclick="quickSearch('cómo criar gatos')">Cómo criar</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    🐱 Mewgenics Wiki ES · Datos de <a href="https://mewgenics.wiki.gg" target="_blank" style="color:var(--accent);text-decoration:none;">mewgenics.wiki.gg</a> · Traducido por IA
+  </footer>
+</div>
+
+<script>
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').style.display = 'flex';
+  });
+
+  document.getElementById('installBtn')?.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+    }
+  });
+
+  document.getElementById('dismissBtn')?.addEventListener('click', () => {
+    document.getElementById('installBanner').style.display = 'none';
+  });
+
+  document.getElementById('searchInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  function quickSearch(term) {
+    document.getElementById('searchInput').value = term;
+    doSearch();
+  }
+
+  function searchCategory(cat) {
+    document.getElementById('searchInput').value = cat;
+    doSearch();
+  }
+
+  function showLoading() {
+    document.getElementById('results').innerHTML = `
+      <div class="loading">
+        <span class="paws">🐾</span>
+        <p>Consultando la wiki...</p>
+      </div>
+    `;
+  }
+
+  function renderResult(text, query) {
+    const tagMatch = text.match(/\[(CLASE|HABILIDAD|ENEMIGO|OBJETO|MECÁNICA|ELEMENTO|NPC|ZONA|GENERAL)\]/i);
+    const tag = tagMatch ? tagMatch[1] : 'INFO';
+    const cleanText = text.replace(/\[.*?\]\s*/g, '');
+
+    let html = cleanText
+      .replace(/### (.+)/g, '<h3>$1</h3>')
+      .replace(/## (.+)/g, '<h3>$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^- (.+)/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+      .replace(/\n\n+/g, '</p><p>');
+
+    if (!html.startsWith('<')) html = '<p>' + html + '</p>';
+
+    const wikiUrl = `https://mewgenics.wiki.gg/index.php?search=${encodeURIComponent(query)}`;
+
+    document.getElementById('results').innerHTML = `
+      <div class="result-card">
+        <span class="result-tag">${tag}</span>
+        <div class="result-body">${html}</div>
+        <a href="${wikiUrl}" target="_blank" class="source-link">
+          📖 Ver en Wiki oficial (inglés) ↗
+        </a>
+      </div>
+    `;
+  }
+
+  async function doSearch() {
+    const query = document.getElementById('searchInput').value.trim();
+    if (!query) return;
+
+    const btn = document.getElementById('searchBtn');
+    btn.disabled = true;
+    showLoading();
+
+    try {
+      const response = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+
+      if (!response.ok) throw new Error(`Error ${response.status}`);
+
+      const data = await response.json();
+      if (data.result) {
+        renderResult(data.result, query);
+      } else {
+        throw new Error(data.error || 'Respuesta vacía');
+      }
+    } catch (err) {
+      document.getElementById('results').innerHTML = `
+        <div class="error-msg">
+          😿 No se pudo obtener información. Intentá de nuevo.<br>
+          <small style="margin-top:8px;display:block;opacity:0.6">${err.message}</small>
+        </div>
+      `;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
